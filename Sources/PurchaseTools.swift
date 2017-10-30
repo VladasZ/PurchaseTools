@@ -20,7 +20,7 @@ public class PurchaseTools : NSObject {
     private static var productsRestoreRequestCompletionHandler: PurchaseToolsRequestCompletion!
     private static let instance = PurchaseTools()
     
-    static var productsStorage: ProductsStorage.Type!
+    public static var productsStorage: ProductsStorage.Type!
     
     private override init() { super.init(); PaymentQueue.add(self) }
     
@@ -28,7 +28,7 @@ public class PurchaseTools : NSObject {
         return Set<String>(productsStorage.allProducts.map { $0.identifier })
     }
     
-    static func getProducts(_ completion: @escaping PurchaseToolsRequestCompletion) {
+    public static func getProducts(_ completion: @escaping PurchaseToolsRequestCompletion) {
         
         if productsStorage == nil {
             completion("productsStorage propety is nil")
@@ -55,7 +55,7 @@ public class PurchaseTools : NSObject {
         }
     }
     
-    static func restore(_ completion: @escaping PurchaseToolsRequestCompletion) {
+    public static func restore(_ completion: @escaping PurchaseToolsRequestCompletion) {
         productsRestoreRequestCompletionHandler = completion
         PaymentQueue.restoreCompletedTransactions()
     }
@@ -70,11 +70,6 @@ public class PurchaseTools : NSObject {
     
     static func purchase(_ product: Product) {
         
-        if product.type == .autoRenewSubscription {
-            product.invokeCompletion("Auto renew subscribitions aren't supported yet")
-            return
-        }
-        
         if product.purchased {
             product.invokeCompletion("This product is already purchased")
             return
@@ -84,7 +79,7 @@ public class PurchaseTools : NSObject {
             product.invokeCompletion("Invalid product")
             return
         }
-    
+        
         PaymentQueue.add(SKPayment(product: product.skProduct))
     }
 }
@@ -130,7 +125,7 @@ extension PurchaseTools : SKPaymentTransactionObserver {
     }
     
     private func complete(transaction: SKPaymentTransaction) {
-    
+        
         if let product = PurchaseTools.productsStorage.productForTransaction(transaction) {
             product.setPurchased()
             product.invokeCompletion()
@@ -160,7 +155,14 @@ extension PurchaseTools : SKPaymentTransactionObserver {
     
     private func fail(transaction: SKPaymentTransaction) {
         
-        print("fail(transaction: SKPaymentTransaction)")
+        if let product = PurchaseTools.productsStorage.productForTransaction(transaction) {
+            product.invokeCompletion(transaction.error?.localizedDescription)
+        }
+        else {
+            print("[❤️ PurchaseTools error ❤️]: failed to get failed product for id: \(transaction.payment.productIdentifier)")
+        }
+        
         PaymentQueue.finishTransaction(transaction)
     }
 }
+
