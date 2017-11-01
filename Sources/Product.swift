@@ -21,13 +21,13 @@ public enum ProductType {
 public class Product {
     
     private var purchaseCompletion: PurchaseToolsRequestCompletion!
-    private var _name: String?
-    
     private var defaultsKey: String {
         return "PurchaseToolsDefaultsID\(identifier)"
     }
     
-    public var name: String { return _name ?? identifier }
+    public var name: String { return skProduct?.localizedTitle ?? "No skProduct" }
+    public var description: String { return skProduct?.localizedDescription ?? "No skProduct" }
+    public var price: NSDecimalNumber { return skProduct?.price ?? 0 }
     public var identifier: ProductIdentifier
     public var type: ProductType
     public var skProduct: SKProduct!
@@ -38,8 +38,7 @@ public class Product {
         return UserDefaults.standard.bool(forKey: defaultsKey)
     }
     
-    public init(identifier: ProductIdentifier, type: ProductType, name: String? = nil) {
-        self._name = name
+    public init(identifier: ProductIdentifier, type: ProductType) {
         self.identifier = identifier
         self.type = type
     }

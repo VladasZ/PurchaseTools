@@ -20,7 +20,7 @@ public class PurchaseTools : NSObject {
     private static var productsRestoreRequestCompletionHandler: PurchaseToolsRequestCompletion!
     private static let instance = PurchaseTools()
     
-    public static var productsStorage: ProductsStorage.Type!
+    private static var productsStorage: ProductsStorage.Type!
     
     private override init() { super.init(); PaymentQueue.add(self) }
     
@@ -28,12 +28,9 @@ public class PurchaseTools : NSObject {
         return Set<String>(productsStorage.allProducts.map { $0.identifier })
     }
     
-    public static func getProducts(_ completion: @escaping PurchaseToolsRequestCompletion) {
+    public static func getProductsForStorage(_ storage: ProductsStorage.Type, _ completion: @escaping PurchaseToolsRequestCompletion) {
         
-        if productsStorage == nil {
-            completion("productsStorage propety is nil")
-            return
-        }
+        productsStorage = storage
         
         requestProducts { error, response in
             
