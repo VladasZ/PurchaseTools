@@ -13,14 +13,14 @@ fileprivate typealias StoreKitRequestCompletion = (_ error: String?, _ response:
 
 fileprivate let PaymentQueue = SKPaymentQueue.default()
 
-public class PurchaseTools : NSObject {
+internal class PurchaseTools : NSObject {
     
     private static var productsRequest: SKProductsRequest?
     private static var productsRequestCompletionHandler: StoreKitRequestCompletion!
     private static var productsRestoreRequestCompletionHandler: PurchaseToolsRequestCompletion!
     private static let instance = PurchaseTools()
     
-    public static var productsStorage: ProductsStorage.Type!
+    private static var productsStorage: ProductsStorage.Type!
     
     private override init() { super.init(); PaymentQueue.add(self) }
     
@@ -28,12 +28,9 @@ public class PurchaseTools : NSObject {
         return Set<String>(productsStorage.allProducts.map { $0.identifier })
     }
     
-    public static func getProducts(_ completion: @escaping PurchaseToolsRequestCompletion) {
+    static func getProductsForStorage(_ storage: ProductsStorage.Type, _ completion: @escaping PurchaseToolsRequestCompletion) {
         
-        if productsStorage == nil {
-            completion("productsStorage propety is nil")
-            return
-        }
+        productsStorage = storage
         
         requestProducts { error, response in
             
@@ -55,7 +52,7 @@ public class PurchaseTools : NSObject {
         }
     }
     
-    public static func restore(_ completion: @escaping PurchaseToolsRequestCompletion) {
+    static func restore(_ completion: @escaping PurchaseToolsRequestCompletion) {
         productsRestoreRequestCompletionHandler = completion
         PaymentQueue.restoreCompletedTransactions()
     }
@@ -71,7 +68,7 @@ public class PurchaseTools : NSObject {
     static func purchase(_ product: Product) {
         
         if product.purchased {
-            product.invokeCompletion("This product is already purchased")
+            product.invokeCompletion(nil)
             return
         }
         
@@ -88,14 +85,14 @@ public class PurchaseTools : NSObject {
 
 extension PurchaseTools : SKProductsRequestDelegate {
     
-    public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         if response.invalidProductIdentifiers.count > 0 {
             print("[❤️ PurchaseTools error ❤️]: invalid ids: \(response.invalidProductIdentifiers)");
         }
         PurchaseTools.productsRequestCompletionHandler(nil, response)
     }
     
-    public func request(_ request: SKRequest, didFailWithError error: Error) {
+    func request(_ request: SKRequest, didFailWithError error: Error) {
         PurchaseTools.productsRequestCompletionHandler(error.localizedDescription, nil)
     }
 }
@@ -104,7 +101,7 @@ extension PurchaseTools : SKProductsRequestDelegate {
 
 extension PurchaseTools : SKPaymentTransactionObserver {
     
-    public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         
         var restoredTransactions = [SKPaymentTransaction]()
         
