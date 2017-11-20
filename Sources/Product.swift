@@ -19,7 +19,7 @@ public enum ProductType {
 
 fileprivate extension Date {
     func daysTo(_ date: Date) -> Int {
-        return Int((date.timeIntervalSinceReferenceDate - timeIntervalSinceReferenceDate) / (60 * 60 * 24))
+        return abs(Int((date.timeIntervalSinceReferenceDate - timeIntervalSinceReferenceDate) / (60 * 60 * 24)))
     }
 }
 
@@ -55,7 +55,7 @@ public class Product {
         if type == .consumable { return false }
         if type == .autoRenewSubscription {
             guard let purchaseData = self.purchaseDate else { return false }
-            if Date().daysTo(purchaseData) <= 0 {
+            if Date().daysTo(purchaseData) >= subscribitionDuration {
                 UserDefaults.standard.set(false, forKey: defaultsKey)
                 purchaseDate = nil
                 return false
@@ -83,6 +83,9 @@ public class Product {
     
     public func purchase(_ completion: @escaping PurchaseToolsRequestCompletion) {
         if pendingPurchase { return }
+        if type == .autoRenewSubscription && subscribitionDuration == 0 {
+            print("[❤️ PurchaseTools error ❤️]: autoRenewSubscription without duration")
+        }
         pendingPurchase = true
         purchaseCompletion = completion
         PurchaseTools.purchase(self)
@@ -99,6 +102,11 @@ public class Product {
         if purchaseCompletion == nil { return }
         purchaseCompletion(error)
         purchaseCompletion = nil
+    }
+    
+    @discardableResult public func setDuration(_ duration: UInt) -> Self {
+        subscribitionDuration = duration
+        return self
     }
 }
 
