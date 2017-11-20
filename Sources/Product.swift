@@ -38,6 +38,14 @@ public class Product {
     public var skProduct: SKProduct!
     public var isValid: Bool { return skProduct != nil }
     
+    internal var onPurchase: (() -> ())?
+    private var pendingPurchase = false
+    
+    @discardableResult public func onPurchase(_ action: @escaping () -> ()) -> Product {
+        onPurchase = action
+        return self
+    }
+    
     private (set) public var purchaseDate: Date? {
         get { return UserDefaults.standard.value(forKey: purchaseDateDefaultsKey) as? Date }
         set { UserDefaults.standard.set(newValue, forKey: purchaseDateDefaultsKey) }
@@ -74,6 +82,8 @@ public class Product {
     }
     
     public func purchase(_ completion: @escaping PurchaseToolsRequestCompletion) {
+        if pendingPurchase { return }
+        pendingPurchase = true
         purchaseCompletion = completion
         PurchaseTools.purchase(self)
     }
@@ -85,6 +95,7 @@ public class Product {
     }
     
     func invokeCompletion(_ error: String? = nil) {
+        pendingPurchase = false
         if purchaseCompletion == nil { return }
         purchaseCompletion(error)
         purchaseCompletion = nil

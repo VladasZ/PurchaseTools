@@ -126,6 +126,8 @@ extension PurchaseTools : SKPaymentTransactionObserver {
         if let product = PurchaseTools.productsStorage.productForTransaction(transaction) {
             product.setPurchased()
             product.invokeCompletion()
+            product.onPurchase?()
+            product.onPurchase = nil
         }
         else {
             print("[❤️ PurchaseTools error ❤️]: failed to get purchased product for id: \(transaction.payment.productIdentifier)")
