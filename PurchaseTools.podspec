@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 s.name           = 'PurchaseTools'
-s.version        = '0.2.3'
+s.version        = '0.2.4'
 s.summary        = "Purchase helper to make your life easier."
 s.homepage       = "https://github.com/VladasZ/PurchaseTools"
 s.author         = { 'Vladas Zakrevskis' => '146100@gmail.com' }

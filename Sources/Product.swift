@@ -39,7 +39,7 @@ public class Product {
     public var isValid: Bool { return skProduct != nil }
     
     internal var onPurchase: (() -> ())?
-    private var pendingPurchase = false
+    internal var pendingPurchase = false
     
     @discardableResult public func onPurchase(_ action: @escaping () -> ()) -> Product {
         onPurchase = action

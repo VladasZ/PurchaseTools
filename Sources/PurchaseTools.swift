@@ -128,6 +128,7 @@ extension PurchaseTools : SKPaymentTransactionObserver {
             product.invokeCompletion()
             product.onPurchase?()
             product.onPurchase = nil
+            product.pendingPurchase = false
         }
         else {
             print("[❤️ PurchaseTools error ❤️]: failed to get purchased product for id: \(transaction.payment.productIdentifier)")
@@ -145,6 +146,7 @@ extension PurchaseTools : SKPaymentTransactionObserver {
                 print("[❤️ PurchaseTools error ❤️]: failed to get restored product for id: \(transaction.payment.productIdentifier)");
                 continue
             }
+            product.pendingPurchase = false
             product.setPurchased()
         }
         
@@ -155,6 +157,7 @@ extension PurchaseTools : SKPaymentTransactionObserver {
     private func fail(transaction: SKPaymentTransaction) {
         
         if let product = PurchaseTools.productsStorage.productForTransaction(transaction) {
+            product.pendingPurchase = false
             product.invokeCompletion(transaction.error?.localizedDescription)
         }
         else {
