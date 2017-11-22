@@ -54,7 +54,8 @@ public class Product {
     public var purchased: Bool {
         if type == .consumable { return false }
         if type == .autoRenewSubscription {
-            guard let purchaseData = self.purchaseDate else { return false }
+            guard let purchaseData = self.purchaseDate else
+            { return UserDefaults.standard.bool(forKey: defaultsKey) }
             if Date().daysTo(purchaseData) >= subscribitionDuration {
                 UserDefaults.standard.set(false, forKey: defaultsKey)
                 purchaseDate = nil
