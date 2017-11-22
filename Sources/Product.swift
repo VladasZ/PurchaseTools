@@ -28,7 +28,7 @@ public class Product {
     private var purchaseCompletion: PurchaseToolsRequestCompletion!
     private var defaultsKey: String { return "PurchaseToolsDefaultsID\(identifier)" }
     private var purchaseDateDefaultsKey: String { return defaultsKey + "purchaseDate" }
-    private var subscribitionDurationDefaultsKey: String { return defaultsKey + "purchaseDate" }
+    private var subscribitionDurationDefaultsKey: String { return defaultsKey + "subscribitionDuration" }
     
     public var name: String { return skProduct?.localizedTitle ?? "No skProduct" }
     public var description: String { return skProduct?.localizedDescription ?? "No skProduct" }
